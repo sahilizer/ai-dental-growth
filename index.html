@@ -3,140 +3,454 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dental Lead Response System — Demo</title>
+<title>AI Lead Response System — Dental Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b1020; --card:#141b30; --card2:#1b2440; --line:#26304f;
-    --txt:#e7ecf7; --mut:#8b96b5; --acc:#7aa2ff;
-    --hot:#fb7185; --warm:#fbbf24; --cold:#60a5fa; --ok:#34d399; --warn:#fcd34d;
+    --bg:#f5f7fb; --surface:#ffffff; --surface-2:#fbfcfe; --surface-3:#f2f5fa;
+    --line:#e8ebf3; --line-strong:#dde1ec; --line-soft:#eef1f7;
+    --txt:#0f172a; --txt-2:#334155; --mut:#64748b; --mut-2:#94a3b8;
+    --acc:#4f46e5; --acc-2:#6366f1; --acc-soft:#eef2ff; --acc-ink:#3730a3; --acc-line:#e0e7ff;
+    --hot:#e11d48; --hot-soft:#fff1f3; --warm:#b45309; --warm-soft:#fff8eb;
+    --cold:#2563eb; --cold-soft:#eff5ff;
+    --ok:#059669; --ok-soft:#ecfdf5; --ok-line:#a7f3d0;
+    --warn:#b45309; --warn-soft:#fff8eb; --warn-line:#fde68a;
+    --shadow:0 1px 2px rgba(15,23,42,.04), 0 8px 24px rgba(15,23,42,.05);
+    --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+    --shadow-md:0 4px 16px rgba(15,23,42,.07);
+    --ring:0 0 0 3px rgba(79,70,229,.14);
+    --radius:14px; --radius-sm:10px; --radius-lg:18px;
+    --font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   }
   *{box-sizing:border-box;margin:0}
-  body{background:var(--bg);color:var(--txt);
-       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px}
-  header{display:flex;align-items:center;gap:12px;padding-bottom:16px;
-         border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
-  .logo{width:40px;height:40px;border-radius:11px;color:#fff;font-size:20px;
+  html,body{background:var(--bg)}
+  body{color:var(--txt);font:15px/1.65 var(--font);
+       font-optical-sizing:auto;
+       font-feature-settings:"cv02","cv03","cv04","cv11";
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:var(--acc);text-decoration:none}
+  ::selection{background:rgba(79,70,229,.18)}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+
+  /* ---------- fluid wrapper (was max-width:1180px) ---------- */
+  .wrap{max-width:1640px;margin-inline:auto;padding:32px clamp(24px,4vw,64px) 72px}
+
+  /* ---------- header ---------- */
+  .topbar{display:flex;align-items:center;gap:16px;margin-bottom:44px;flex-wrap:wrap}
+  .logo{width:46px;height:46px;border-radius:13px;color:#fff;font-size:24px;
         background:linear-gradient(135deg,#4f46e5,#6366f1);
-        display:flex;align-items:center;justify-content:center}
-  h1{font-size:19px}
-  .tag{color:var(--mut);font-size:13px}
-  .stats{margin-left:auto;text-align:right;font-size:13px;color:var(--mut)}
-  .stats b{color:var(--txt);font-size:16px}
-  .banner{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.5);
-          color:var(--warn);border-radius:10px;padding:10px 14px;font-size:13px;
-          font-weight:600;margin-bottom:18px;text-align:center}
-  .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:10px}
-  h2 small{text-transform:none;letter-spacing:0}
-  .lead{cursor:pointer;margin-bottom:10px;display:flex;justify-content:space-between;
-        align-items:center;gap:10px;transition:.15s}
-  .lead:hover{border-color:var(--acc)}
-  .lead.sel{border-color:var(--acc);background:var(--card2)}
-  .lead b{display:block;font-size:14px}
-  .lead small{color:var(--mut)}
-  .chip{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:700;white-space:nowrap}
-  .score-ring{width:96px;height:96px;border-radius:50%;flex:none;
+        display:flex;align-items:center;justify-content:center;flex:none;
+        box-shadow:0 8px 20px rgba(79,70,229,.34)}
+  .brand h1{font-size:17px;font-weight:700;letter-spacing:-.014em;line-height:1.2}
+  .brand .tag{color:var(--mut);font-size:13px;margin-top:3px}
+  .demo-badge{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.05em;
+              color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);
+              padding:7px 13px;border-radius:999px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+  .demo-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 3px rgba(180,83,9,.16)}
+  .stats{display:flex;gap:32px;margin-left:auto;align-self:center}
+  .stats .s{text-align:right}
+  .stats .s b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1;
+              font-variant-numeric:tabular-nums}
+  .stats .s small{color:var(--mut);font-size:11.5px;font-weight:500}
+
+  /* ---------- hero ---------- */
+  .hero{margin-bottom:36px;padding:6px 0 4px}
+  .hero h2{font-size:40px;font-weight:750;letter-spacing:-.034em;line-height:1.06;
+           max-width:920px;background:linear-gradient(180deg,#0f172a,#1e293b);
+           -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .sub{font-size:20px;color:var(--txt-2);margin-top:20px;max-width:680px;font-weight:500;letter-spacing:-.014em}
+  .hero .sup{font-size:15px;color:var(--mut);margin-top:14px;max-width:660px}
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:32px}
+  .flow .step{font-size:13.5px;font-weight:600;color:var(--acc-ink);
+              background:var(--acc-soft);border:1px solid var(--acc-line);
+              padding:10px 16px;border-radius:10px;display:inline-flex;align-items:center;gap:10px}
+  .flow .step .n{font-size:11px;font-weight:700;color:var(--acc);opacity:.7;letter-spacing:.04em}
+  .flow .arr{color:var(--mut-2);font-size:14px;font-weight:600;user-select:none}
+
+  /* ---------- demo banner ---------- */
+  .banner{display:flex;align-items:flex-start;gap:14px;
+          background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);
+          border-radius:12px;padding:16px 20px;font-size:14px;font-weight:500;
+          margin-bottom:40px;line-height:1.6}
+  .banner .ico{flex:none;width:22px;height:22px;border-radius:50%;background:var(--warn);
+               color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-top:1px}
+  .banner b{font-weight:700;display:block;margin-bottom:3px;letter-spacing:.02em}
+  .banner span.txt{display:block}
+
+  /* ---------- section heading ---------- */
+  .sec-title{font-size:12.5px;text-transform:uppercase;letter-spacing:.1em;
+             color:var(--mut);font-weight:660;margin:0 0 16px}
+  .sec-title small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--mut-2)}
+  .sec-block{margin-bottom:44px}
+  .sec-desc{font-size:14px;color:var(--mut);margin:-10px 0 22px;line-height:1.65;max-width:820px}
+
+  /* ---------- how it works ---------- */
+  .guide{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+  .guide .g{position:relative;background:var(--surface);border:1px solid var(--line);
+            border-radius:var(--radius);padding:22px 20px 24px;box-shadow:var(--shadow-sm);transition:.16s}
+  .guide .g:hover{border-color:var(--acc-line);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .guide .n{width:30px;height:30px;border-radius:8px;font-size:12.5px;font-weight:700;
+            color:var(--acc-ink);background:var(--acc-soft);border:1px solid var(--acc-line);
+            display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+  .guide .gt{font-size:15px;font-weight:650;margin-top:16px;line-height:1.3;letter-spacing:-.005em}
+  .guide .gd{font-size:13px;color:var(--mut);margin-top:9px;line-height:1.6}
+
+  /* ---------- pipeline (full-width responsive grid) ---------- */
+  #leadList{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+  .lead{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;
+        background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+        padding:18px 20px;box-shadow:var(--shadow-sm);margin:0;
+        transition:transform .14s, border-color .14s, box-shadow .14s, background .14s}
+  .lead:hover{border-color:var(--acc-line);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+  .lead.sel{border-color:var(--acc);background:var(--acc-soft);
+             box-shadow:0 0 0 1px var(--acc) inset, var(--shadow-md)}
+  .lead .ld{min-width:0;flex:1}
+  .lead b{display:block;font-size:15.5px;font-weight:640;white-space:nowrap;overflow:hidden;
+           text-overflow:ellipsis;letter-spacing:-.008em}
+  .lead small{color:var(--mut);font-size:13px;display:block;margin-top:5px}
+  .lead .age{color:var(--mut-2)}
+  .chip{font-size:11.5px;padding:5px 12px;border-radius:999px;font-weight:700;white-space:nowrap;letter-spacing:.02em}
+  .lead .chip{flex:none}
+
+  /* ---------- main workspace grid ---------- */
+  .grid{display:grid;grid-template-columns:420px minmax(0,1fr);gap:28px;align-items:start}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+        padding:28px;box-shadow:var(--shadow)}
+
+  /* ---------- form ---------- */
+  .form-note{font-size:13.5px;color:var(--mut);margin:-8px 0 24px;line-height:1.65}
+  .field{margin-bottom:22px}
+  .field:last-of-type{margin-bottom:26px}
+  .field label{display:block;font-size:13.5px;font-weight:650;color:var(--txt-2);
+                margin-bottom:9px;letter-spacing:-.005em}
+  .field .hint{font-weight:400;color:var(--mut-2);font-size:12.5px;margin-left:7px}
+  .help{font-size:13px;color:var(--mut);margin-top:9px;line-height:1.6}
+  input,select{width:100%;background:var(--surface-2);color:var(--txt);
+               border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;
+               font:inherit;font-size:15px;transition:.15s}
+  input::placeholder{color:var(--mut-2)}
+  input:focus,select:focus{outline:none;border-color:var(--acc);background:#fff;box-shadow:var(--ring)}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:26px}
+  .field-row .field{margin-bottom:0}
+  label.chk{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600;color:var(--txt-2);
+            cursor:pointer;line-height:1.4;width:100%;background:var(--surface-2);
+            border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;transition:.15s}
+  label.chk:hover{border-color:var(--acc-line)}
+  label.chk input{width:auto;flex:none;cursor:pointer;accent-color:var(--acc)}
+  label.chk .ch-label{font-weight:600}
+  .btn-acc{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;
+           box-shadow:0 8px 20px rgba(79,70,229,.30)}
+  .btn-acc:hover{filter:brightness(1.06);box-shadow:0 10px 24px rgba(79,70,229,.36)}
+  .btn-acc:active{transform:translateY(.5px)}
+  .btn-helper{text-align:center;font-size:13px;color:var(--mut);margin-top:12px;line-height:1.55}
+
+  /* ---------- detail ---------- */
+  #detail h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.1em;
+             color:var(--mut);font-weight:660;margin:0 0 20px}
+  #detail h2 small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--mut-2)}
+  #detail h2.mt{margin-top:34px}
+  .sec-desc-inline{font-size:13.5px;color:var(--mut);margin:-12px 0 20px;line-height:1.65}
+
+  .score-wrap{display:flex;gap:36px;align-items:center;flex-wrap:wrap}
+  .score-ring{width:156px;height:156px;border-radius:50%;flex:none;
               display:flex;align-items:center;justify-content:center}
-  .score-ring>div{width:74px;height:74px;border-radius:50%;background:var(--card);
-                  display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .score-ring b{font-size:24px;line-height:1}
-  .score-ring small{font-size:10px;color:var(--mut)}
-  .reasons{list-style:none;margin:8px 0}
-  .reasons li{padding:5px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
-  .r-plus{color:var(--ok)} .r-minus{color:var(--hot)} .r-neut{color:var(--mut)}
-  /* timeline */
-  .tl{list-style:none;margin:6px 0 2px}
-  .tl li{position:relative;padding:0 0 13px 26px;font-size:13px}
-  .tl li:before{content:"";position:absolute;left:6px;top:5px;width:9px;height:9px;
-                border-radius:50%;background:var(--acc)}
-  .tl li:after{content:"";position:absolute;left:10px;top:17px;bottom:-1px;
-               width:1px;background:var(--line)}
+  .score-ring>div{width:122px;height:122px;border-radius:50%;background:var(--surface);
+                  display:flex;flex-direction:column;align-items:center;justify-content:center;
+                  box-shadow:var(--shadow-sm)}
+  .score-ring b{font-size:46px;line-height:1;font-weight:750;letter-spacing:-.03em;
+                font-variant-numeric:tabular-nums}
+  .score-ring small{font-size:12.5px;color:var(--mut);margin-top:6px;font-weight:500}
+  .score-meta{min-width:240px;flex:1}
+  .score-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);font-weight:660;margin-bottom:12px}
+  .score-meta .tier{font-size:14px;font-weight:700;padding:8px 15px;border-radius:999px;
+                    letter-spacing:.03em;display:inline-block;cursor:help}
+  .score-meta .tier-help{font-size:13px;color:var(--mut);margin-top:12px;line-height:1.6;display:block}
+  .score-meta .who{margin-top:20px;font-size:17px;font-weight:640;letter-spacing:-.012em}
+  .score-meta .who .sub{color:var(--mut);font-size:13px;margin-top:7px;display:block;font-weight:400;line-height:1.65}
+
+  details.calc{margin-top:22px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);overflow:hidden}
+  details.calc summary{cursor:pointer;padding:15px 18px;font-size:13.5px;font-weight:600;color:var(--acc-ink);
+                       list-style:none;display:flex;align-items:center;gap:9px;user-select:none}
+  details.calc summary::-webkit-details-marker{display:none}
+  details.calc summary::before{content:"ⓘ";width:20px;height:20px;border-radius:50%;background:var(--acc-soft);
+                                color:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  details.calc[open] summary{border-bottom:1px solid var(--line)}
+  details.calc .calc-body{padding:16px 18px;font-size:13px;color:var(--txt-2);line-height:1.7}
+  details.calc .calc-body ul{margin:10px 0 0;padding-left:20px}
+  details.calc .calc-body li{margin:4px 0}
+  details.calc .calc-body .note{margin-top:12px;color:var(--mut);font-size:12.5px}
+
+  .reasons{list-style:none;margin:6px 0 0}
+  .reasons li{padding:16px 0;border-bottom:1px solid var(--line-soft);font-size:14px;
+              display:flex;gap:14px;align-items:flex-start;line-height:1.6}
+  .reasons li:last-child{border-bottom:none}
+  .reasons .k{flex:none;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;
+              justify-content:center;font-size:13px;font-weight:700;margin-top:1px}
+  .r-plus .k{background:var(--ok-soft);color:var(--ok)}
+  .r-minus .k{background:var(--hot-soft);color:var(--hot)}
+  .r-neut .k{background:var(--surface-3);color:var(--mut)}
+  .reasons .rt{font-weight:620;color:var(--txt);display:block;font-size:14px}
+  .reasons .rd{color:var(--mut);font-size:13px;display:block;margin-top:4px;line-height:1.6}
+
+  .esc{background:var(--hot-soft);border-left:3px solid var(--hot);
+       padding:18px 20px;border-radius:10px;font-size:14px;margin:20px 0 0;color:#7f1d2f;line-height:1.65}
+  .esc .esc-q{font-weight:700;display:block;margin-bottom:8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--hot)}
+  .esc .esc-a{font-weight:500;display:block}
+  .action{background:var(--acc-soft);border-left:3px solid var(--acc);
+          padding:17px 19px;border-radius:10px;font-size:14px;margin:18px 0 0;color:var(--acc-ink);line-height:1.65}
+  .action .a-label{font-weight:700;display:block;margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+
+  /* ---------- timeline ---------- */
+  .tl{list-style:none;margin:8px 0 2px}
+  .tl li{position:relative;padding:0 0 26px 34px;font-size:14px}
+  .tl li:before{content:"";position:absolute;left:5px;top:4px;width:16px;height:16px;
+                border-radius:50%;background:var(--acc);border:2px solid var(--surface);
+                box-shadow:0 0 0 2px var(--acc-soft);transition:.2s}
+  .tl li:after{content:"";position:absolute;left:12px;top:22px;bottom:0;width:2px;background:var(--line-strong)}
+  .tl li:last-child{padding-bottom:8px}
   .tl li:last-child:after{display:none}
-  .tl li.pending{opacity:.38}
-  .tl li.pending:before{background:var(--line)}
-  .tl b{font-size:13px}
-  .tl .m{float:right;color:var(--mut);font-size:11px;font-family:ui-monospace,Menlo,monospace}
-  .tl span{color:var(--mut);display:block;font-size:12.5px}
-  .esc{background:rgba(251,113,133,.10);border-left:3px solid var(--hot);
-       padding:10px 12px;border-radius:8px;font-size:13px;margin:10px 0}
-  .action{background:var(--card2);border-left:3px solid var(--acc);
-          padding:10px 12px;border-radius:8px;font-size:13.5px;margin:10px 0}
-  textarea{width:100%;background:var(--bg);color:var(--txt);border:1px solid var(--line);
-           border-radius:10px;padding:12px;font:inherit;font-size:13.5px;resize:vertical}
-  textarea:focus{outline:none;border-color:var(--acc)}
-  button{cursor:pointer;border:none;border-radius:9px;font:inherit;font-weight:600;
-         padding:9px 14px;background:var(--card2);color:var(--txt);transition:.15s}
-  button:hover{filter:brightness(1.2)}
-  button:disabled{opacity:.35;cursor:not-allowed;filter:none}
-  .btn-acc{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff}
-  .btn-ok{background:rgba(52,211,153,.15);color:var(--ok)}
-  .strow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .strow button.on{outline:2px solid var(--acc)}
-  form .row{display:flex;gap:10px;margin-bottom:10px}
-  input,select{flex:1;min-width:0;background:var(--bg);color:var(--txt);
-               border:1px solid var(--line);border-radius:9px;padding:9px 11px;
-               font:inherit;font-size:13.5px}
-  input:focus,select:focus{outline:none;border-color:var(--acc)}
-  label.chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--mut);cursor:pointer}
-  .empty{color:var(--mut);text-align:center;padding:60px 10px}
-  .detail{animation:fadeUp .25s ease}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
-  .flash{animation:flash .8s ease}
-  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}100%{box-shadow:0 0 0 18px rgba(52,211,153,0)}}
-  .urlbox{display:flex;align-items:center;gap:8px;background:var(--bg);
-          border:1px dashed var(--acc);border-radius:9px;padding:9px 11px;
-          margin:8px 0;font-size:13px;flex-wrap:wrap}
-  .ph{background:var(--warn);color:#1a1a1a;font-size:10px;font-weight:800;
-      padding:2px 8px;border-radius:99px;letter-spacing:.06em}
-  code{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--acc);word-break:break-all}
-  .note{color:var(--mut);font-size:12px}
-  .evlog{margin-top:12px;font-size:12px;color:var(--mut)}
-  .evlog div{padding:4px 0;border-top:1px dashed var(--line)}
-  footer{text-align:center;color:var(--mut);font-size:12px;margin-top:24px;line-height:1.7}
+  .tl li.pending{opacity:.55}
+  .tl li.pending:before{background:var(--surface);border-color:var(--line-strong);box-shadow:none}
+  .tl li.pending:after{background:repeating-linear-gradient(var(--line-strong) 0 4px,transparent 4px 8px)}
+  .tl b{font-size:14.5px;font-weight:640;display:block;color:var(--txt);letter-spacing:-.005em}
+  .tl .m{float:right;color:var(--mut-2);font-size:11.5px;font-family:ui-monospace,Menlo,monospace;font-weight:600}
+  .tl span{color:var(--mut);display:block;font-size:13px;margin-top:7px;line-height:1.65}
+
+  /* ---------- draft / booking ---------- */
+  textarea{width:100%;background:var(--surface-2);color:var(--txt);border:1px solid var(--line-strong);
+           border-radius:11px;padding:16px 17px;font:inherit;font-size:14.5px;resize:vertical;
+           transition:.15s;line-height:1.7}
+  textarea:focus{outline:none;border-color:var(--acc);box-shadow:var(--ring);background:#fff}
+  .edit-hint{font-size:12.5px;color:var(--mut-2);margin-top:10px;display:flex;align-items:center;gap:7px}
+  .edit-hint::before{content:"✎";color:var(--mut-2)}
+
+  button{cursor:pointer;border:1px solid var(--line-strong);border-radius:10px;font:inherit;
+         font-weight:600;font-size:14px;padding:11px 16px;background:var(--surface);
+         color:var(--txt);transition:.15s}
+  button:hover{border-color:var(--acc);color:var(--acc)}
+  button:active{transform:translateY(.5px)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button:disabled:hover{border-color:var(--line-strong);color:var(--txt)}
+
+  .draft-head{display:flex;align-items:center;gap:11px;margin-bottom:16px;flex-wrap:wrap}
+  .draft-head h2{margin:0}
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--warn);
+        background:var(--warn-soft);border:1px solid var(--warn-line);
+        padding:5px 11px;border-radius:999px;text-transform:uppercase}
+
+  .strow{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .strow button.on{outline:2px solid var(--acc);outline-offset:1px;border-color:var(--acc);color:var(--acc)}
+  .btn-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)}
+  .btn-ok:hover{border-color:var(--ok);color:var(--ok)}
+  .btn-ok.on{outline-color:var(--ok);border-color:var(--ok);color:var(--ok)}
+
+  .status-help{margin-top:16px;display:grid;gap:10px}
+  .status-help .sh{font-size:13px;color:var(--mut);line-height:1.6;padding:0 2px}
+  .status-help .sh b{color:var(--txt-2);font-weight:650}
+
+  .urlbox{display:flex;align-items:center;gap:12px;background:var(--surface-2);
+          border:1px dashed var(--acc-line);border-radius:10px;padding:14px 16px;
+          margin:14px 0 8px;font-size:13.5px;flex-wrap:wrap}
+  .ph{background:var(--warn);color:#fff;font-size:10.5px;font-weight:800;
+      padding:4px 10px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--acc-ink);word-break:break-all;font-size:13px}
+  .note{color:var(--mut);font-size:13px;margin-top:10px;line-height:1.65}
+
+  .evlog{margin-top:22px;font-size:12.5px;color:var(--mut)}
+  .evlog .ev-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut-2);font-weight:660;margin-bottom:10px}
+  .evlog div.ev-item{padding:9px 0;border-top:1px dashed var(--line-soft)}
+  .evlog div.ev-item:first-of-type{border-top:none}
+
+  .empty{color:var(--mut);text-align:center;padding:100px 24px 92px}
+  .empty .em{font-size:34px;margin-bottom:20px;opacity:.45}
+  .empty .et{font-size:19px;font-weight:640;color:var(--txt-2);margin-bottom:12px;letter-spacing:-.012em}
+  .empty .ed{font-size:14.5px;color:var(--mut);max-width:400px;margin:0 auto;line-height:1.75}
+  .empty .ea{margin-top:26px;font-size:13px;color:var(--acc);font-weight:600;display:inline-block}
+
+  .detail{animation:fadeUp .28s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+  .flash{animation:flash .9s ease}
+  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(5,150,105,.4)}100%{box-shadow:0 0 0 22px rgba(5,150,105,0)}}
+
+  /* ---------- business value ---------- */
+  .value{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .value .v{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+            padding:24px 22px 26px;box-shadow:var(--shadow-sm);transition:.16s}
+  .value .v:hover{border-color:var(--acc-line);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .value .vt{font-size:13.5px;font-weight:700;letter-spacing:.03em;color:var(--acc-ink)}
+  .value .vd{font-size:13.5px;color:var(--mut);margin-top:11px;line-height:1.65}
+
+  /* ---------- final CTA ---------- */
+  .cta{display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+       margin-top:44px;padding:34px 36px;background:var(--surface);
+       border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+  .cta .ct{font-size:22px;font-weight:660;letter-spacing:-.02em}
+  .cta .cs{font-size:14.5px;color:var(--mut);margin-top:9px;line-height:1.65;max-width:640px}
+  .cta .btn-acc{margin-left:auto;padding:14px 28px;font-size:15px}
+
+  footer{text-align:center;color:var(--mut-2);font-size:13px;margin-top:48px;line-height:1.85}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1400px){
+    .grid{grid-template-columns:400px minmax(0,1fr)}
+  }
+  @media(max-width:1100px){
+    #leadList{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+    .grid{grid-template-columns:380px minmax(0,1fr);gap:24px}
+    .hero h2{font-size:34px}
+    .hero .sub{font-size:18px}
+  }
+  @media(max-width:920px){
+    .wrap{padding:28px 22px 60px}
+    .grid{grid-template-columns:1fr}
+    .guide{grid-template-columns:repeat(2,1fr)}
+    .stats{order:3;margin-left:0;width:100%;gap:36px;padding-top:22px;border-top:1px solid var(--line-soft)}
+    .demo-badge{margin-left:auto}
+    #leadList{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  }
+  @media(max-width:760px){
+    .hero h2{font-size:28px}
+    .hero .sub{font-size:17px}
+    .cta{padding:26px}
+    .cta .btn-acc{margin-left:0;width:100%;text-align:center}
+    .value{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:600px){
+    .guide{grid-template-columns:1fr}
+    #leadList{grid-template-columns:1fr}
+    .value{grid-template-columns:1fr}
+    .score-ring{width:132px;height:132px}
+    .score-ring>div{width:104px;height:104px}
+    .score-ring b{font-size:36px}
+    .strow button{flex:1;min-width:0;text-align:center}
+    .field-row{grid-template-columns:1fr;gap:22px}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="logo">🦷</div>
-    <div><h1>Dental Lead Response System</h1>
-      <div class="tag">AI lead triage &amp; response automation · sales demo</div></div>
-    <div class="stats"><b id="statLeads">0</b> active leads<br>
-      <b id="statPipe">$0</b> illustrative pipeline <span style="font-size:11px">(simulated)</span></div>
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="logo" aria-hidden="true">🦷</div>
+    <div class="brand">
+      <h1>Dental Lead Response System</h1>
+      <div class="tag">AI lead triage &amp; response automation</div>
+    </div>
+    <span class="demo-badge" title="Fictional patient data. No messages are sent and no appointments are booked.">DEMO MODE</span>
+    <div class="stats" aria-label="Pipeline statistics">
+      <div class="s"><b id="statLeads">0</b><small>active leads</small></div>
+      <div class="s"><b id="statPipe">$0</b><small>illustrative pipeline (simulated)</small></div>
+    </div>
   </header>
 
-  <div class="banner">⚠️ DEMO MODE — ALL PATIENT DATA IS FICTIONAL.
-    This simulation does not send messages, book appointments, or contact anyone.</div>
+  <!-- HERO -->
+  <section class="hero">
+    <h2>AI Lead Response System</h2>
+    <p class="sub">Turn dental inquiries into booked appointments.</p>
+    <p class="sup">Capture, qualify, respond, follow up and escalate — automatically.</p>
+    <div class="flow" aria-label="Automation workflow">
+      <span class="step"><span class="n">01</span>Capture</span><span class="arr">→</span>
+      <span class="step"><span class="n">02</span>Qualify</span><span class="arr">→</span>
+      <span class="step"><span class="n">03</span>Respond</span><span class="arr">→</span>
+      <span class="step"><span class="n">04</span>Follow Up</span><span class="arr">→</span>
+      <span class="step"><span class="n">05</span>Escalate</span>
+    </div>
+  </section>
 
+  <!-- DEMO BANNER -->
+  <div class="banner" role="status">
+    <span class="ico" aria-hidden="true">!</span>
+    <span class="txt"><b>DEMO MODE</b>All patient data is fictional. This prototype does not send messages or create appointments.</span>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="sec-block">
+    <h3 class="sec-title">How this demo works</h3>
+    <p class="sec-desc">Five steps, run automatically when a new inquiry arrives. Everything below is simulated for demonstration.</p>
+    <div class="guide">
+      <div class="g"><div class="n">01</div><div class="gt">Submit an inquiry</div><div class="gd">Fill the form to simulate a new patient contacting the practice.</div></div>
+      <div class="g"><div class="n">02</div><div class="gt">Intent is scored</div><div class="gd">A rule-based engine estimates lead priority from 0–100.</div></div>
+      <div class="g"><div class="n">03</div><div class="gt">Response is drafted</div><div class="gd">A suggested reply is prepared for staff to review and edit.</div></div>
+      <div class="g"><div class="n">04</div><div class="gt">Follow-up is queued</div><div class="gd">A simulated reminder is scheduled if the lead doesn't reply.</div></div>
+      <div class="g"><div class="n">05</div><div class="gt">Staff is alerted</div><div class="gd">Leads that need a person are flagged for human review.</div></div>
+    </div>
+  </div>
+
+  <!-- PIPELINE (full width) -->
+  <div class="sec-block">
+    <div class="sec-title" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <span style="margin:0">Lead Pipeline <small>· select a lead to explore the workflow</small></span>
+      <span class="count" id="pipeCount" style="font-size:12px;color:var(--mut-2);font-weight:500;text-transform:none;letter-spacing:0"></span>
+    </div>
+    <p class="sec-desc" style="margin-top:-6px">Select a lead to see its simulated intent analysis, recommended action and response draft. Intent score is a simulated 0–100 estimate of how urgently the lead should be prioritized.</p>
+    <div id="leadList" role="list" aria-label="Lead pipeline"></div>
+  </div>
+
+  <!-- WORKSPACE: form + analysis -->
   <div class="grid">
-    <!-- LEFT -->
-    <div>
-      <div class="card">
-        <h2>New inquiry <small>(simulated web-form submission)</small></h2>
-        <form id="intake">
-          <div class="row"><input id="fName" placeholder="Patient name" required></div>
-          <div class="row"><input id="fPhone" placeholder="Phone (leave blank to trigger escalation)"></div>
-          <div class="row">
-            <select id="fTreat" required>
-              <option value="" disabled selected>Treatment of interest</option>
-            </select>
+    <div class="card">
+      <h3 class="sec-title">New inquiry</h3>
+      <p class="form-note">Simulate a new patient inquiry to see the workflow run end-to-end.</p>
+      <form id="intake" novalidate>
+        <div class="field">
+          <label for="fName">Patient name</label>
+          <input id="fName" placeholder="e.g. Jordan Rivera" required autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="fPhone">Phone number</label>
+          <input id="fPhone" placeholder="e.g. (415) 555-0100" autocomplete="off">
+          <p class="help">Optional in this demo. A missing phone number triggers a simulated staff-escalation condition.</p>
+        </div>
+        <div class="field">
+          <label for="fTreat">Treatment of interest</label>
+          <select id="fTreat" required></select>
+          <p class="help">Select the service the lead is asking about. Higher-value services receive more simulated intent weight.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="fDays">Days since inquiry</label>
+            <input id="fDays" type="number" min="0" max="90" value="1">
+            <p class="help">How long ago the lead contacted the practice. Used to model intent decay.</p>
           </div>
-          <div class="row">
-            <input id="fDays" type="number" min="0" max="90" value="1" title="Days since inquiry">
-            <label class="chk"><input type="checkbox" id="fIns"> Has insurance</label>
+          <div class="field">
+            <label for="fIns">Insurance coverage</label>
+            <label class="chk" for="fIns">
+              <input type="checkbox" id="fIns">
+              <span class="ch-label">Has insurance coverage</span>
+            </label>
+            <p class="help">Used only as a simulated intent signal — adds +10 intent points. Does not calculate coverage, eligibility, or a discount.</p>
           </div>
-          <button class="btn-acc" id="runBtn" style="width:100%">▶ Run AI triage</button>
-        </form>
-      </div>
-      <h2 style="margin:18px 0 10px">Pipeline</h2>
-      <div id="leadList"></div>
+        </div>
+        <button class="btn-acc" id="runBtn" style="width:100%" type="submit">▶ Run Lead Triage</button>
+        <p class="btn-helper">Simulates scoring, response drafting and automation. Nothing is sent.</p>
+      </form>
     </div>
 
-    <!-- RIGHT -->
-    <div class="card" id="detail"></div>
+    <div class="card" id="detail" aria-live="polite"></div>
+  </div>
+
+  <!-- BUSINESS VALUE -->
+  <div class="sec-block" style="margin-top:48px">
+    <h3 class="sec-title">What this system is designed to improve</h3>
+    <p class="sec-desc">The business problems this workflow is built to address. No outcomes are guaranteed.</p>
+    <div class="value">
+      <div class="v"><div class="vt">FASTER RESPONSE</div><div class="vd">Reduce delays between an inquiry and the practice's first response.</div></div>
+      <div class="v"><div class="vt">SMARTER PRIORITIZATION</div><div class="vd">Help staff focus on leads showing stronger buying intent.</div></div>
+      <div class="v"><div class="vt">AUTOMATED FOLLOW-UP</div><div class="vd">Keep potential patients from being forgotten after the first inquiry.</div></div>
+      <div class="v"><div class="vt">STAFF ESCALATION</div><div class="vd">Surface leads that need human attention instead of leaving them in a queue.</div></div>
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <div class="cta">
+    <div>
+      <div class="ct">See the lead response workflow in action.</div>
+      <div class="cs">Submit a simulated inquiry and watch the workflow run from intake to staff escalation.</div>
+    </div>
+    <button class="btn-acc" onclick="document.getElementById('fName').focus()">▶ Run Lead Triage</button>
   </div>
 
   <footer>All patients fictional · No SMS or email is ever sent · No appointments are created<br>
@@ -154,27 +468,57 @@ const TREATMENTS = {
   "Teeth Whitening":     { pts:  8, val:  450 },
   "Cleaning & Exam":     { pts:  4, val:  150 },
 };
-const TIER_C = { HOT:"#fb7185", WARM:"#fbbf24", COLD:"#60a5fa" };
+const TIER_C  = { HOT:"#e11d48", WARM:"#b45309", COLD:"#2563eb" };
+const TIER_BG = { HOT:"#fff1f3", WARM:"#fff8eb", COLD:"#eff5ff" };
+const TIER_HELP = {
+  HOT:  "High-priority lead based on the demo's scoring rules.",
+  WARM: "Moderate priority — worth a timely response.",
+  COLD: "Lower priority — suitable for nurture follow-up.",
+};
 const ACTION = {
   HOT:  "Recommended SLA: staff call within 15 minutes while intent is highest.",
   WARM: "Send the drafted response today; auto follow-up fires if no reply within 48h.",
   COLD: "Enroll in nurture sequence; escalate to staff if unresponsive after two touches.",
 };
+const STATUS_ORDER = { new:0, contacted:1, booked:2 };
+const STATUS_HELP = {
+  new:       "Lead has been received but staff has not responded yet.",
+  contacted: "Staff has simulated a first response to the lead.",
+  booked:    "Appointment outcome is simulated only — no real appointment exists.",
+};
+const STATUS_LABEL = { new:"🆕 New", contacted:"📨 Contacted", booked:"✅ Booked" };
+const ESC_REASON_TEXT = {
+  nophone: "No phone number available for simulated outreach.",
+  coldidle: lead => `Cold lead has remained inactive for ${lead.days} days.`,
+};
 
-// ---------- fake AI engine ----------
-// ponytail: rule-based scorer standing in for an LLM. To go real, replace
-// analyze()/draft() with a fetch() to your model endpoint — UI contract unchanged.
+// ---------- rule-based engine (AI-style lead triage simulation) ----------
+// NOT a real LLM call. To go live, replace analyze()/draft() with a fetch()
+// to your model endpoint — the UI contract stays the same.
 function analyze(l){
   let s = 42, r = [];
   const t = TREATMENTS[l.treatment];
   s += t.pts;
-  r.push(["+", `${l.treatment} — higher-value treatment category`]);
-  if (l.insurance){ s += 10; r.push(["+", "Has insurance — typically fewer cost objections"]); }
-  if (l.days <= 3){ s += 12; r.push(["+", "Inquired recently — peak intent window"]); }
-  else if (l.days >= 10){ s -= 10; r.push(["−", `Inquiry is ${l.days} days old — intent decaying`]); }
-  else { r.push(["~", `${l.days} days since inquiry — still reachable`]); }
-  if (l.phone){ s += 4; r.push(["+", "Direct phone line available"]); }
-  else { r.push(["−", "No phone on file — limits outreach channels"]); }
+  r.push(["+", l.treatment, "Higher simulated treatment-value weight in the scoring rules."]);
+  if (l.insurance){
+    s += 10;
+    r.push(["+", "Insurance coverage", "Adds +10 simulated intent points in this demo. No discount or eligibility is calculated."]);
+  }
+  if (l.days <= 3){
+    s += 12;
+    r.push(["+", `Inquiry ${l.days === 0 ? "today" : l.days + " day" + (l.days===1?"":"s") + " ago"}`, "Recent inquiries receive higher simulated intent."]);
+  } else if (l.days >= 10){
+    s -= 10;
+    r.push(["−", `Inquiry ${l.days} days old`, "Older inquiries receive lower simulated intent — intent decays over time."]);
+  } else {
+    r.push(["~", `Inquiry ${l.days} days ago`, "Mid-age inquiry — still reachable, no bonus or penalty."]);
+  }
+  if (l.phone){
+    s += 4;
+    r.push(["+", "Phone available", "Additional simulated outreach signal — more channels to reach the lead."]);
+  } else {
+    r.push(["−", "No phone on file", "Limits outreach channels — contributes to a simulated escalation condition."]);
+  }
   s = Math.max(5, Math.min(98, Math.round(s)));
   return { score: s, tier: s >= 75 ? "HOT" : s >= 55 ? "WARM" : "COLD", reasons: r };
 }
@@ -202,22 +546,26 @@ function buildSteps(l){
                   : null;
   l.escalated = !!escReason;
   l.escReason = escReason;
+  l.escReasonText = !l.phone ? ESC_REASON_TEXT.nophone
+                  : (l.tier === "COLD" && l.days >= 7) ? ESC_REASON_TEXT.coldidle(l)
+                  : "";
   return [
-    { t:"Inquiry received",      m:"T+0s",   d:"Web-form inquiry captured (simulated)" },
-    { t:"Intent detected",       m:"T+0.2s", d:`Scored ${l.score}/100 → classified ${l.tier}` },
-    { t:"Response drafted",      m:"T+0.4s", d:"Template personalized with inquiry details" },
-    { t:"Booking CTA attached",  m:"T+0.6s", d:"Placeholder scheduling URL inserted into draft" },
-    { t:"Follow-up scheduled",   m:"T+48h",  d:"Automatic reminder queued if no reply (simulated)" },
+    { t:"Inquiry received",      m:"T+0s",   d:"Lead captured from the simulated inquiry form." },
+    { t:"Intent detected",       m:"T+0.2s", d:`Lead receives a simulated priority score of ${l.score}/100 and is classified ${l.tier}.` },
+    { t:"Response drafted",      m:"T+0.4s", d:"System prepares a suggested response for staff review." },
+    { t:"Booking CTA attached",  m:"T+0.6s", d:"Demo inserts a placeholder scheduling link into the draft." },
+    { t:"Follow-up scheduled",   m:"T+48h",  d:"Demo queues a simulated follow-up if the lead does not respond." },
     { t:"Staff escalation",      m:"on rule",
-      d: escReason ? `Triggered — ${escReason}. Routed to staff review queue (simulated)`
-                   : "Not triggered — standard automation path sufficient" },
+      d: escReason ? "Cases matching escalation rules are flagged for human review."
+                   : "Not triggered — the standard automation path is sufficient for this lead." },
   ].map(s => ({ ...s, done:true }));
 }
 
 // ---------- state ----------
-let leads = [], selId = null;
+let leads = [], selId = null, leadIdCounter = 0;
 
 function addLead(l, ready){
+  if (!l.id) l.id = ++leadIdCounter;
   Object.assign(l, analyze(l));
   l.sms = draft(l);
   l.status = "new";
@@ -242,6 +590,7 @@ const esc = s => String(s).replace(/[&<>"']/g,
   c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const money = n => "$" + n.toLocaleString("en-US");
 const sel = () => leads.find(l => l.id === selId);
+const ageText = d => d === 0 ? "today" : d === 1 ? "1 day ago" : `${d} days ago`;
 
 async function copyText(txt, btn){
   try { await navigator.clipboard.writeText(txt); }
@@ -250,7 +599,7 @@ async function copyText(txt, btn){
     ta.value = txt; document.body.appendChild(ta);
     ta.select(); document.execCommand("copy"); ta.remove();
   }
-  const old = btn.textContent; btn.textContent = "✅ Copied";
+  const old = btn.textContent; btn.textContent = "✓ Copied";
   setTimeout(() => btn.textContent = old, 1400);
 }
 
@@ -260,14 +609,20 @@ function renderStats(){
   $("statLeads").textContent = act.length;
   $("statPipe").textContent = money(Math.round(act.reduce(
     (sum,l) => sum + TREATMENTS[l.treatment].val * l.score / 100, 0)));
+  $("pipeCount").textContent = `${leads.length} leads · ${act.length} active`;
 }
 
 function renderList(){
   $("leadList").innerHTML = leads.map(l => `
-    <div class="card lead ${l.id===selId?"sel":""}" onclick="select(${l.id})">
-      <div><b>${esc(l.name)}</b><small>${esc(l.treatment)} · ${l.days}d ago</small></div>
-      <span class="chip" style="background:${TIER_C[l.tier]}22;color:${TIER_C[l.tier]}">
-        ${l.tier} ${l.score}</span>
+    <div class="lead ${l.id===selId?"sel":""}" role="listitem"
+         onclick="select(${l.id})" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();select(${l.id})}">
+      <div class="ld">
+        <b>${esc(l.name)}</b>
+        <small>${esc(l.treatment)} · <span class="age">${ageText(l.days)}</span></small>
+      </div>
+      <span class="chip" style="background:${TIER_BG[l.tier]};color:${TIER_C[l.tier]}"
+            title="Intent score — simulated 0–100 estimate of priority">${l.tier} · ${l.score}</span>
     </div>`).join("");
   renderStats();
 }
@@ -275,62 +630,105 @@ function renderList(){
 function renderDetail(flash){
   const d = $("detail"), l = sel();
   if (!l){ d.className = "card"; d.innerHTML =
-    `<div class="empty">👈 Select a lead to see its AI analysis,<br>or run a new inquiry on the left.</div>`;
+    `<div class="empty">
+       <div class="em" aria-hidden="true">👈</div>
+       <div class="et">Select a lead to explore the workflow</div>
+       <div class="ed">Choose a lead from the pipeline above to see its simulated score, recommended action, automation timeline and response draft.</div>
+       <span class="ea">Or run a new inquiry on the left →</span>
+     </div>`;
     return; }
 
-  const c = TIER_C[l.tier];
+  const c = TIER_C[l.tier], bg = TIER_BG[l.tier];
   d.className = "card detail" + (flash ? " flash" : "");
   d.innerHTML = `
     <h2>Intent analysis</h2>
-    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
-      <div class="score-ring" style="background:conic-gradient(${c} ${l.score}%, var(--line) 0)">
+    <div class="score-wrap">
+      <div class="score-ring" style="background:conic-gradient(${c} ${l.score}%, var(--line) ${l.score}%)">
         <div><b>${l.score}</b><small>/ 100</small></div>
       </div>
-      <div>
-        <span class="chip" style="background:${c}22;color:${c};font-size:13px">${l.tier} INTENT</span>
-        <p style="margin-top:8px"><b>${esc(l.name)}</b> · ${esc(l.phone)||"no phone on file"}<br>
-        <small style="color:var(--mut)">${esc(l.treatment)} · est. case value
-          <b>${money(TREATMENTS[l.treatment].val)}</b> (illustrative)</small></p>
+      <div class="score-meta">
+        <div class="score-eyebrow">Intent score</div>
+        <span class="tier" style="background:${bg};color:${c}"
+              title="${esc(TIER_HELP[l.tier])}">${l.tier} INTENT</span>
+        <span class="tier-help">${esc(TIER_HELP[l.tier])} This is a simulated priority score, not a clinical prediction or a guarantee of conversion.</span>
+        <div class="who">${esc(l.name)}
+          <span class="sub">${esc(l.phone)||"no phone on file"} · ${esc(l.treatment)} · est. case value ${money(TREATMENTS[l.treatment].val)} (illustrative)</span>
+        </div>
       </div>
     </div>
 
-    <h2 style="margin-top:18px">Why this score</h2>
-    <ul class="reasons">${l.reasons.map(([k,t]) =>
-      `<li class="${k==="+"?"r-plus":k==="−"?"r-minus":"r-neut"}">${k} ${esc(t)}</li>`).join("")}</ul>
+    <details class="calc">
+      <summary>How is this score calculated?</summary>
+      <div class="calc-body">
+        The current demo uses a rule-based engine — not a live LLM. The simulated score combines:
+        <ul>
+          <li><b>Treatment category</b> — higher-value services add more points.</li>
+          <li><b>Inquiry age</b> — recent inquiries add points; older ones subtract points.</li>
+          <li><b>Insurance flag</b> — adds +10 intent points (no coverage or discount is calculated).</li>
+          <li><b>Phone availability</b> — adds a small outreach-channel signal.</li>
+        </ul>
+        <p class="note">Scores are capped between 5 and 98. This is a demonstration only.</p>
+      </div>
+    </details>
 
-    <h2 style="margin-top:16px">Automation timeline</h2>
+    <h2 class="mt">Why this score</h2>
+    <ul class="reasons">${l.reasons.map(([k,t,detail]) =>
+      `<li class="${k==="+"?"r-plus":k==="−"?"r-minus":"r-neut"}">
+         <span class="k">${k}</span>
+         <span><span class="rt">${esc(t)}</span><span class="rd">${esc(detail)}</span></span>
+       </li>`).join("")}</ul>
+
+    <h2 class="mt">What happens automatically</h2>
+    <p class="sec-desc-inline">This timeline shows what the system would do after a lead is received. All actions are simulated in this demo.</p>
     <ul class="tl">${l.steps.map(s =>
       `<li class="${s.done?"":"pending"}"><span class="m">${s.m}</span><b>${esc(s.t)}</b>
        <span>${esc(s.d)}</span></li>`).join("")}</ul>
-    ${!l.ready ? `<p class="note">◌ Processing…</p>` : `
-    ${l.escalated ? `<div class="esc">🚨 <b>Routed to staff review queue</b> (simulated) —
-       reason: ${esc(l.escReason)}</div>` : ""}
-    <div class="action"><b>Recommended next step:</b> ${ACTION[l.tier]}</div>
+    ${!l.ready ? `<p class="note" style="margin-top:16px">◌ Processing…</p>` : `
+    ${l.escalated ? `<div class="esc">
+        <span class="esc-q">Why was this escalated?</span>
+        <span class="esc-a">${esc(l.escReasonText || l.escReason)}. Routed to staff review — a human decides the next step; no automated message is sent.</span>
+       </div>` : ""}
+    <div class="action"><span class="a-label">Recommended next step</span>${ACTION[l.tier]}</div>
 
-    <h2 style="margin-top:16px">Draft response <small>· editable — nothing is sent</small></h2>
-    <textarea id="smsBox" rows="5">${esc(l.sms)}</textarea>
+    <div class="draft-head" style="margin-top:34px">
+      <h2 style="margin:0">Suggested reply for staff review</h2>
+      <span class="pill">Not sent</span>
+    </div>
+    <p class="sec-desc-inline">A draft response prepared from the lead's details. Edit it freely — nothing is sent from this demo.</p>
+    <textarea id="smsBox" rows="5" aria-label="Suggested reply, editable">${esc(l.sms)}</textarea>
+    <div class="edit-hint">Editable draft — changes stay local to this demo.</div>
     <div class="strow">
       <button onclick="copyDraft(this)">📋 Copy draft (does not send)</button>
     </div>
 
-    <h2 style="margin-top:16px">Booking CTA</h2>
-    <div class="urlbox"><span class="ph">PLACEHOLDER</span>
+    <h2 class="mt">Booking link</h2>
+    <p class="sec-desc-inline">A placeholder URL demonstrating where a practice's real scheduling link would appear in the draft.</p>
+    <div class="urlbox"><span class="ph">Placeholder</span>
       <code>${esc(BOOKING_URL)}</code>
       <button onclick="copyUrl(this)">copy</button></div>
-    <p class="note">Reserved example.com domain. Replace with the practice's real
-      scheduling link before any production use.</p>
+    <p class="note">Reserved example.com domain — not a real scheduling page. Replace it before any production use.</p>
 
-    <h2 style="margin-top:16px">Status <small>· simulated workflow</small></h2>
+    <h2 class="mt">Lead status</h2>
+    <p class="sec-desc-inline">Use these buttons to simulate the lead moving through the sales workflow.</p>
     <div class="strow">
-      ${[["new","🆕 New"],["contacted","📨 Contacted"],["booked","✅ Booked"]].map(([s,label]) => {
+      ${["new","contacted","booked"].map(s => {
+        const cur = STATUS_ORDER[l.status], target = STATUS_ORDER[s];
         const isCur = l.status === s;
-        const locked = s === "booked" && l.status !== "contacted";
-        return `<button class="${isCur?(s==="booked"?"btn-ok on":"on"):""}"
-          ${locked||isCur?"disabled":""} title="${locked?"Mark Contacted first":""}"
-          onclick="setStatus('${s}')">${label}</button>`;
+        const locked = target > cur + 1 || target < cur;
+        const cls = isCur ? (s==="booked"?"btn-ok on":"on") : (s==="booked"?"btn-ok":"");
+        return `<button class="${cls}" ${locked||isCur?"disabled":""}
+          title="${locked?"Mark Contacted first":""}" onclick="setStatus('${s}')">${STATUS_LABEL[s]}</button>`;
       }).join("")}
     </div>
-    <div class="evlog">${l.events.map(e => `<div>${esc(e)}</div>`).join("")}</div>`}`;
+    <div class="status-help">
+      ${["new","contacted","booked"].map(s =>
+        `<div class="sh"><b>${STATUS_LABEL[s]}:</b> ${esc(STATUS_HELP[s])}</div>`).join("")}
+    </div>
+
+    <div class="evlog">
+      <div class="ev-title">Activity log</div>
+      ${l.events.map(e => `<div class="ev-item">${esc(e)}</div>`).join("")}
+    </div>`}`;
 }
 
 function rerender(flash){ renderList(); renderDetail(flash); }
@@ -342,6 +740,7 @@ window.copyUrl   = btn => copyText(BOOKING_URL, btn);
 
 window.setStatus = st => {
   const l = sel(); if (!l || l.status === st) return;
+  if (STATUS_ORDER[st] > STATUS_ORDER[l.status] + 1 || STATUS_ORDER[st] < STATUS_ORDER[l.status]) return;
   l.status = st;
   l.events.push(st === "contacted"
     ? `Manual · Marked Contacted — demo action only, no message was sent`
@@ -350,13 +749,14 @@ window.setStatus = st => {
 };
 
 // ---------- intake with visible pipeline animation ----------
-$("fTreat").innerHTML += Object.keys(TREATMENTS)
-  .map(t => `<option>${t}</option>`).join("");
+$("fTreat").innerHTML = Object.keys(TREATMENTS)
+  .map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
 
 $("intake").addEventListener("submit", e => {
   e.preventDefault();
+  if (!$("fName").value.trim() || !$("fTreat").value) return;
   const btn = $("runBtn");
-  btn.disabled = true; btn.textContent = "◌ Running AI triage…";
+  btn.disabled = true; btn.textContent = "◌ Running lead triage…";
 
   const l = {
     id: Date.now(),
@@ -366,7 +766,7 @@ $("intake").addEventListener("submit", e => {
     days: parseInt($("fDays").value) || 0,
     insurance: $("fIns").checked,
   };
-  addLead(l, false);            // steps exist but hidden until revealed
+  addLead(l, false);
   l.steps.forEach(s => s.done = false);
   selId = l.id;
   rerender(false);
@@ -379,7 +779,7 @@ $("intake").addEventListener("submit", e => {
       clearInterval(timer);
       l.ready = true;
       e.target.reset(); $("fDays").value = 1;
-      btn.disabled = false; btn.textContent = "▶ Run AI triage";
+      btn.disabled = false; btn.textContent = "▶ Run Lead Triage";
       rerender(true);
     }
   }, 320);
