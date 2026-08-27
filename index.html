@@ -43,7 +43,7 @@
         background:linear-gradient(135deg,#4f46e5,#6366f1);
         display:flex;align-items:center;justify-content:center;flex:none;
         box-shadow:0 8px 20px rgba(79,70,229,.34)}
-  .brand h1{font-size:17px;font-weight:700;letter-spacing:-.014em;line-height:1.2}
+  .brand h1{font-size:17px;font-weight:700;letter-spacing:-.014em;line-height:1.35;padding-bottom:2px}
   .brand .tag{color:var(--mut);font-size:13px;margin-top:3px}
   .demo-badge{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.05em;
               color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);
@@ -57,7 +57,7 @@
 
   /* ---------- hero ---------- */
   .hero{margin-bottom:36px;padding:6px 0 4px}
-  .hero h2{font-size:40px;font-weight:750;letter-spacing:-.034em;line-height:1.06;
+  .hero h2{font-size:40px;font-weight:750;letter-spacing:-.034em;line-height:1.14;padding-bottom:2px;
            max-width:920px;background:linear-gradient(180deg,#0f172a,#1e293b);
            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .hero .sub{font-size:20px;color:var(--txt-2);margin-top:20px;max-width:680px;font-weight:500;letter-spacing:-.014em}
@@ -292,6 +292,20 @@
 
   footer{text-align:center;color:var(--mut-2);font-size:13px;margin-top:48px;line-height:1.85}
 
+  /* ---------- live AI analysis ---------- */
+  .ai-panel{margin-top:28px;border:1px solid var(--acc-line);background:linear-gradient(180deg,#fbfcff,#f8f9ff);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow-sm)}
+  .ai-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .ai-title{font-size:12.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--acc-ink);font-weight:700}
+  .ai-badge{font-size:11px;font-weight:700;color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok-line);padding:5px 9px;border-radius:999px}
+  .ai-badge.pending{color:var(--warm);background:var(--warm-soft);border-color:var(--warn-line)}
+  .ai-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .ai-box{background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 16px}
+  .ai-box b{display:block;font-size:12.5px;color:var(--txt-2);margin-bottom:7px}
+  .ai-box p{font-size:13px;color:var(--mut);line-height:1.65}
+  .ai-model{margin-top:12px;font-size:11.5px;color:var(--mut-2)}
+  .ai-panel .ai-error{color:var(--hot);font-size:13px;line-height:1.6}
+  @media(max-width:760px){.ai-grid{grid-template-columns:1fr}}
+
   /* ---------- responsive ---------- */
   @media(max-width:1400px){
     .grid{grid-template-columns:400px minmax(0,1fr)}
@@ -372,7 +386,7 @@
     <p class="sec-desc">Five steps, run automatically when a new inquiry arrives. Everything below is simulated for demonstration.</p>
     <div class="guide">
       <div class="g"><div class="n">01</div><div class="gt">Submit an inquiry</div><div class="gd">Fill the form to simulate a new patient contacting the practice.</div></div>
-      <div class="g"><div class="n">02</div><div class="gt">Intent is scored</div><div class="gd">A rule-based engine estimates lead priority from 0–100.</div></div>
+      <div class="g"><div class="n">02</div><div class="gt">Intent is scored</div><div class="gd">A deterministic scoring engine sets the 0–100 priority; live AI explains the result.</div></div>
       <div class="g"><div class="n">03</div><div class="gt">Response is drafted</div><div class="gd">A suggested reply is prepared for staff to review and edit.</div></div>
       <div class="g"><div class="n">04</div><div class="gt">Follow-up is queued</div><div class="gd">A simulated reminder is scheduled if the lead doesn't reply.</div></div>
       <div class="g"><div class="n">05</div><div class="gt">Staff is alerted</div><div class="gd">Leads that need a person are flagged for human review.</div></div>
@@ -425,7 +439,7 @@
           </div>
         </div>
         <button class="btn-acc" id="runBtn" style="width:100%" type="submit">▶ Run Lead Triage</button>
-        <p class="btn-helper">Simulates scoring, response drafting and automation. Nothing is sent.</p>
+        <p class="btn-helper">Scores the lead, generates a live AI analysis and drafts a response. Nothing is sent.</p>
       </form>
     </div>
 
@@ -572,6 +586,7 @@ function addLead(l, ready){
   l.steps = buildSteps(l);
   l.events = [`T+0s · Lead created from simulated inquiry`];
   l.ready = ready !== false;
+  l.aiStatus = ready === false ? "loading" : "demo";
   leads.unshift(l);
 }
 
@@ -601,6 +616,48 @@ async function copyText(txt, btn){
   }
   const old = btn.textContent; btn.textContent = "✓ Copied";
   setTimeout(() => btn.textContent = old, 1400);
+}
+
+// ---------- live AI analysis ----------
+async function runAIForLead(l){
+  l.aiStatus = "loading";
+  rerender(false);
+  try {
+    const response = await fetch("/api/triage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lead: {
+          name: l.name,
+          phone: l.phone,
+          treatment: l.treatment,
+          days: l.days,
+          insurance: l.insurance
+        },
+        score: l.score,
+        tier: l.tier
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || data.detail || `HTTP ${response.status}`);
+
+    l.aiSummary = data.summary || "AI analysis completed.";
+    l.aiReasoning = data.reasoning || "";
+    l.aiNextStep = data.next_step || "Review the draft and contact the lead manually.";
+    l.aiReply = data.reply || l.sms;
+    l.aiModel = data.model || "OpenRouter";
+    l.aiFallback = !!data.fallback;
+    l.aiStatus = "ready";
+    l.sms = l.aiReply;
+    l.events.push(`AI · Analysis generated using ${l.aiModel}${l.aiFallback ? " with free fallback" : ""}`);
+  } catch (err) {
+    console.error("AI triage failed", err);
+    l.aiStatus = "error";
+    l.aiError = err.message || "Unknown AI error";
+    l.events.push("AI · Live analysis failed — deterministic demo result retained");
+  }
+  rerender(false);
 }
 
 // ---------- rendering ----------
@@ -660,7 +717,7 @@ function renderDetail(flash){
     <details class="calc">
       <summary>How is this score calculated?</summary>
       <div class="calc-body">
-        The current demo uses a rule-based engine — not a live LLM. The simulated score combines:
+        The 0–100 priority score is deterministic so the demo stays consistent. Live AI is used separately for the narrative analysis and response draft. The score combines:
         <ul>
           <li><b>Treatment category</b> — higher-value services add more points.</li>
           <li><b>Inquiry age</b> — recent inquiries add points; older ones subtract points.</li>
@@ -677,6 +734,23 @@ function renderDetail(flash){
          <span class="k">${k}</span>
          <span><span class="rt">${esc(t)}</span><span class="rd">${esc(detail)}</span></span>
        </li>`).join("")}</ul>
+
+    <section class="ai-panel" aria-live="polite">
+      <div class="ai-head">
+        <span class="ai-title">Live AI response analysis</span>
+        <span class="ai-badge ${l.aiStatus === "ready" ? "" : "pending"}">${l.aiStatus === "ready" ? "AI READY" : l.aiStatus === "loading" ? "GENERATING…" : l.aiStatus === "error" ? "AI ERROR" : "DEMO"}</span>
+      </div>
+      ${l.aiStatus === "ready" ? `
+      <div class="ai-grid">
+        <div class="ai-box"><b>AI summary</b><p>${esc(l.aiSummary || "")}</p></div>
+        <div class="ai-box"><b>Why this lead matters</b><p>${esc(l.aiReasoning || "")}</p></div>
+        <div class="ai-box"><b>Recommended next action</b><p>${esc(l.aiNextStep || "")}</p></div>
+      </div>
+      <div class="ai-model">Model: ${esc(l.aiModel || "OpenRouter")}${l.aiFallback ? " · automatic free-model fallback used" : ""}</div>` : l.aiStatus === "loading" ? `
+      <p class="ai-error" style="color:var(--mut)">Generating the AI explanation and staff-ready response…</p>` : l.aiStatus === "error" ? `
+      <p class="ai-error">AI analysis could not be generated. The deterministic score and demo workflow remain available.</p>` : `
+      <p class="ai-error" style="color:var(--mut)">This seeded lead uses the deterministic demo data. Run a new inquiry to generate a live AI analysis.</p>`}
+    </section>
 
     <h2 class="mt">What happens automatically</h2>
     <p class="sec-desc-inline">This timeline shows what the system would do after a lead is received. All actions are simulated in this demo.</p>
@@ -695,7 +769,7 @@ function renderDetail(flash){
       <span class="pill">Not sent</span>
     </div>
     <p class="sec-desc-inline">A draft response prepared from the lead's details. Edit it freely — nothing is sent from this demo.</p>
-    <textarea id="smsBox" rows="5" aria-label="Suggested reply, editable">${esc(l.sms)}</textarea>
+    <textarea id="smsBox" rows="5" aria-label="Suggested reply, editable">${esc(l.aiReply || l.sms)}</textarea>
     <div class="edit-hint">Editable draft — changes stay local to this demo.</div>
     <div class="strow">
       <button onclick="copyDraft(this)">📋 Copy draft (does not send)</button>
@@ -768,6 +842,7 @@ $("intake").addEventListener("submit", e => {
   };
   addLead(l, false);
   l.steps.forEach(s => s.done = false);
+  runAIForLead(l);
   selId = l.id;
   rerender(false);
 
